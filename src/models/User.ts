@@ -8,10 +8,34 @@ export interface IUser extends Document {
     status: boolean;
     createDate: Date;
     deleteDate: Date;
-    role: string;
+    role: IUserRole[];
     firstName: string;
     lastName: string;
 }
+
+export interface IUserRole {
+    roleId: Types.ObjectId;
+    roleName: string;
+    type: string;
+}
+
+export const userRoleSchema = new Schema<IUserRole>({
+    roleId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Role',
+        required: true
+    },
+
+    roleName: {
+        type: String,
+        required: true
+    },
+
+    type: {
+        type: String,
+        required: true
+    }
+})
 
 const userSchema = new Schema<IUser>({
     username:{
@@ -48,9 +72,12 @@ const userSchema = new Schema<IUser>({
     },
 
     role: {
-        type: String,
+        type: [userRoleSchema],
         required: true,
-        default: 'role'
+        validate: {
+            validator: (array: IUserRole[]) => array.length > 0,
+            message: "It may has at least one role"
+        }
     },
 
     firstName: {
